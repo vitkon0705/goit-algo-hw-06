@@ -12,10 +12,16 @@ class Name(Field):
 
 class Phone(Field):
     def __init__(self, value: str):
+        if Phone.is_number_correct(value):
+            super().__init__(value)
+
+    @staticmethod
+    def is_number_correct(value: str):
         if len(value) != 10 or not value.isdigit():
             raise ValueError(
                 f"Number {value} is wrong! Phone number must contain only digits and only ten ones")
-        super().__init__(value)
+        return True
+
 
 class Record:
     def __init__(self, name_str: str):
@@ -42,8 +48,13 @@ class Record:
         self.phones.remove(found_phone_obj)
 
     def edit_phone(self, phone_old_str: str, phone_new_str: str):
-        self.remove_phone(phone_old_str)
-        self.add_phone(phone_new_str)
+        if Phone.is_number_correct(phone_old_str) and Phone.is_number_correct(phone_new_str):
+            if not self.find_phone(phone_old_str):
+                raise ValueError(
+                    f"Phone number {phone_old_str} is not in the list!")
+            else:
+                self.remove_phone(phone_old_str)
+                self.add_phone(phone_new_str)
 
 class AddressBook(UserDict):
     def __str__(self):
@@ -55,31 +66,28 @@ class AddressBook(UserDict):
     def add_record(self, record: Record):
         self.data[record.name.value] = record
 
-    def find_record(self, name_str: str):
+    def find(self, name_str: str):
         if name_str in self.data:
             return self.data[name_str]
         return None
 
-    def delete_record(self, name_str: str):
+    def delete(self, name_str: str):
         if name_str in self.data:
             del self.data[name_str]
 
 book = AddressBook()
 john_record = Record("John")
-#print(john_record)
 john_record.add_phone("1234567890")
 john_record.add_phone("5555555555")
-#print(john_record)
 book.add_record(john_record)
 
 jane_record = Record("Jane")
 jane_record.add_phone("9876543210")
 book.add_record(jane_record)
-#print(book)
 
-found_record = book.find_record("John")
+found_record = book.find("John")
 #print(found_record)
-#address_book.delete_record("John")
+#book.delete("John")
 #print(book)
 #found_phone = found_record.find_phone("1234567890")
 #found_record.remove_phone("1234567890")
